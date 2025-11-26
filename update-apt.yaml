@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: [ubuntu24-server]
 
   become: true
   tasks:
