@@ -1,1 +1,10 @@
-apt list --upgradable
+---
+- hosts: all
+  tasks:
+    - name:
+      apt:
+       update_cache: yes
+    - name:
+      command: apt list --upgradable
+      register: updates
+    - debug: var=updates.stdout_lines
