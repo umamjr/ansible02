@@ -1,0 +1,26 @@
+---
+- name: Generate update report
+  hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Check for available updates (Ubuntu/Debian)
+      ansible.builtin.shell: apt list --upgradable 2>/dev/null | grep -v "WARNING" | wc -l
+      register: available_updates_debian
+      when: ansible_os_family == "Debian"
+      changed_when: false
+      failed_when: false
+
+    - name: Check for available updates (CentOS/RHEL/Rocky)
+      ansible.builtin.command: dnf check-update | grep -E "^[a-zA-Z]" | wc -l
+      # Use "yum check-update | grep -E "^[a-zA-Z]" | wc -l" for older systems
+      register: available_updates_redhat
+      when: ansible_os_family == "RedHat"
+      changed_when: false
+      failed_when: false
+
+    - name: Display available updates count
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} has {{ available_updates_debian.stdout if ansible_os_family == 'Debian' else available_updates_redhat.stdout }} updates available."
+      # The 'when' conditions from above implicitly control which variable is accessed.
+      # The debug task will run for all hosts and display the correct count.
